@@ -4,20 +4,17 @@ from sklearn.model_selection import learning_curve
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-def plot_learning_curve(estimator, X, y, cv, modelname="Model", scoring='recall_macro', save=False):
+def plot_learning_curve(estimator, X, y, cv, modelname="Model", scoring='recall_macro'):
     pipeline = make_pipeline(
-        StandardScaler(),  # Scaling is now part of the evaluation
+        StandardScaler(),  
         estimator
     )
-    # Compute learning curve
     train_sizes, train_scores, test_scores = learning_curve( pipeline, X, y, cv=cv, train_sizes=np.linspace(.1, 1.0, 5),
         scoring=scoring,shuffle=True, random_state=42,n_jobs=-1  )
-    # Compute mean and std
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
     test_scores_std = np.std(test_scores, axis=1)
-    # Plot
     plt.figure(figsize=(10, 6))
     plt.title(f'Learning Curve\n{modelname} (Macro Recall)', fontsize=14)
     plt.xlabel('Training examples', fontsize=12)
@@ -30,13 +27,11 @@ def plot_learning_curve(estimator, X, y, cv, modelname="Model", scoring='recall_
     plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
                     test_scores_mean + test_scores_std,alpha=0.2, color='#ff7f0e')
 
-    # Plot mean lines
     plt.plot(train_sizes, train_scores_mean, 'o-', color='#1f77b4', 
             linewidth=2, markersize=8, label='Training Score')
     plt.plot(train_sizes, test_scores_mean, 'o-', color='#ff7f0e', 
             linewidth=2, markersize=8, label='Cross-Val Score')
 
-    # Annotate best score
     best_test_score = test_scores_mean.max()
     best_idx = np.argmax(test_scores_mean)
     plt.annotate(f'Best: {best_test_score:.3f}', xy=(train_sizes[best_idx], best_test_score),
@@ -46,10 +41,5 @@ def plot_learning_curve(estimator, X, y, cv, modelname="Model", scoring='recall_
     plt.legend(loc='lower right', fontsize=10)
     plt.ylim([0, 1.1])
 
-    if save:
-        import os
-        os.makedirs(f'../images/{modelname}', exist_ok=True)
-        plt.savefig(f'../images/{modelname}/learning_curve_macro_recall.png', 
-                   dpi=300, bbox_inches='tight', facecolor='white')
     
     plt.show()
